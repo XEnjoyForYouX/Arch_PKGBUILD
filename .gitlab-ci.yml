@@ -1,7 +1,7 @@
 variables:
   DOCKER_IMAGE: archlinux:base-devel
   SCHEDULE_TASK: default
-  PKGDESK: ./build
+  PKGDEST: ./build
 
 stages:
   - build
@@ -10,11 +10,20 @@ stages:
 makepkg:
   stage: build
   image: ${DOCKER_IMAGE}
+  cache:
+    - key:
+        files:
+          - '*'
+      paths:
+        - /var/cache/pacman/pkg
   before_script:
-      - export PKGDEST=${PKGDEST}
-      - mkdir -p ${PKGDEST}
+      - pacman -Sy --noconfirm --noprogressbar
+      - useradd -d /build -m build
+      - "echo 'build ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers"
+      - su build -c "mkdir -p ./build"
   script:
-      - makepkg -so
+      - export PKGDEST=${PKGDEST}
+      - su build -c "/usr/bin/makepkg -s --noconfirm --noprogressbar"
   artifacts:
     paths:
       - ${PKGDEST}
