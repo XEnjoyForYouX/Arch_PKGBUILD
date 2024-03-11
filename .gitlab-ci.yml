@@ -16,6 +16,7 @@ makepkg:
           - '*'
       paths:
         - /var/cache/pacman/pkg
+        - /build
   before_script:
       - pacman -Sy --noconfirm --noprogressbar
       - useradd -d /build -m build
